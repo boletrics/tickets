@@ -1,3 +1,12 @@
+# 1.0.0 (2025-12-18)
+
+
+### Features
+
+* Add CI and release workflows ([580cc00](https://github.com/boletrics/tickets/commit/580cc002fd2d3c89a545626e0613e6e57b80bf12))
+* Update dependencies and configs ([0c8b2a6](https://github.com/boletrics/tickets/commit/0c8b2a6274d03f6a0d780a7eb39c8156d5823ded))
+* Update pnpm lockfile with new dependencies ([7687dc8](https://github.com/boletrics/tickets/commit/7687dc8cd6b6c6ab7fa66af74bb0b4cbd2b567a9))
+
 # [1.1.0](https://github.com/algtools/next-template/compare/v1.0.0...v1.1.0) (2025-12-17)
 
 
