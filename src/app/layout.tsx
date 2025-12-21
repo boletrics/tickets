@@ -1,6 +1,8 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
+import { getServerSession } from "@/lib/auth/getServerSession";
+import { SessionHydrator } from "@/lib/auth/useAuthSession";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -29,14 +31,18 @@ export const metadata: Metadata = {
 	},
 };
 
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	const session = await getServerSession();
+
 	return (
 		<html lang="en">
-			<body className={`font-sans antialiased`}>{children}</body>
+			<body className={`font-sans antialiased`}>
+				<SessionHydrator serverSession={session}>{children}</SessionHydrator>
+			</body>
 		</html>
 	);
 }
