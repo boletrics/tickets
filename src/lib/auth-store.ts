@@ -17,7 +17,7 @@ export const useAuthStore = create<AuthStore>()(
 		(set) => ({
 			user: null,
 			guestEmail: null,
-			setUser: (user: User) => set({ user }),
+			setUser: (user: User) => set({ user, guestEmail: null }),
 			setGuestEmail: (email: string) => set({ guestEmail: email }),
 			signOut: () => set({ user: null, guestEmail: null }),
 		}),
