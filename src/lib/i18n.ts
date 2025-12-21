@@ -9,6 +9,8 @@ export const translations = {
 		"nav.signUp": "Sign Up",
 		"nav.signOut": "Sign Out",
 		"nav.account": "Account",
+		"nav.guestSession": "Guest Session",
+		"nav.userId": "ID",
 
 		// Home/Events
 		"home.title": "Discover Amazing Events",
@@ -188,6 +190,8 @@ export const translations = {
 		"nav.signUp": "Registrarse",
 		"nav.signOut": "Cerrar Sesión",
 		"nav.account": "Cuenta",
+		"nav.guestSession": "Sesión de Invitado",
+		"nav.userId": "ID",
 
 		// Inicio/Eventos
 		"home.title": "Descubre Eventos Increíbles",

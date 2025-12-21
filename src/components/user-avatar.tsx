@@ -17,10 +17,10 @@ import { useAuthStore } from "@/lib/auth-store";
 
 export function UserAvatar() {
 	const { t } = useLocale();
-	const { user, signOut } = useAuthStore();
+	const { user, guestEmail, signOut } = useAuthStore();
 
-	// Guest avatar (not signed in)
-	if (!user) {
+	// No session (not signed in and no guest session)
+	if (!user && !guestEmail) {
 		return (
 			<Button variant="ghost" size="icon" asChild className="rounded-full">
 				<Link href="/auth">
@@ -34,7 +34,50 @@ export function UserAvatar() {
 		);
 	}
 
-	// Signed in avatar
+	// Guest session
+	if (!user && guestEmail) {
+		const guestInitials = guestEmail[0].toUpperCase();
+
+		return (
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button variant="ghost" size="icon" className="rounded-full">
+						<Avatar className="h-9 w-9 border-2 border-muted-foreground/60">
+							<AvatarFallback className="bg-muted/50 text-muted-foreground font-semibold">
+								{guestInitials}
+							</AvatarFallback>
+						</Avatar>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="w-56">
+					<DropdownMenuLabel className="font-normal">
+						<div className="flex flex-col space-y-1">
+							<p className="text-xs font-medium leading-none text-muted-foreground">
+								{t("nav.guestSession") || "Guest Session"}
+							</p>
+							<p className="text-sm leading-none">{guestEmail}</p>
+						</div>
+					</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem asChild>
+						<Link href="/my-tickets">{t("nav.myTickets")}</Link>
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						onClick={signOut}
+						className="text-destructive focus:text-destructive"
+					>
+						{t("nav.signOut")}
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+		);
+	}
+
+	// Authenticated user session
+	// At this point, user is guaranteed to be non-null due to the checks above
+	if (!user) return null;
+
 	const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
 
 	return (
@@ -56,6 +99,14 @@ export function UserAvatar() {
 						</p>
 						<p className="text-xs leading-none text-muted-foreground">
 							{user.email}
+						</p>
+						{user.phone && (
+							<p className="text-xs leading-none text-muted-foreground">
+								{user.phone}
+							</p>
+						)}
+						<p className="text-xs leading-none text-muted-foreground/70 mt-1">
+							{t("nav.userId") || "ID"}: {user.id.slice(0, 8)}...
 						</p>
 					</div>
 				</DropdownMenuLabel>
