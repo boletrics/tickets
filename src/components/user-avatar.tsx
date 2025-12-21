@@ -1,7 +1,7 @@
 "use client";
 
 import { User } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -13,21 +13,30 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useLocale } from "@/hooks/use-locale";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
+import { logout } from "@/lib/auth/actions";
 import { useAuthStore } from "@/lib/auth-store";
 
 export function UserAvatar() {
 	const { t } = useLocale();
-	const { user, guestEmail, signOut } = useAuthStore();
+	const { data: session, isPending } = useAuthSession();
+	const { guestEmail, signOut: clearGuestSession } = useAuthStore();
 
 	// Authenticated user session (check this first - takes priority)
-	if (user) {
-		const initials = `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+	if (session?.user) {
+		const user = session.user;
+		const nameParts = user.name.split(" ");
+		const initials =
+			nameParts.length >= 2
+				? `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`.toUpperCase()
+				: user.name[0]?.toUpperCase() || "U";
 
 		return (
 			<DropdownMenu>
 				<DropdownMenuTrigger asChild>
 					<Button variant="ghost" size="icon" className="rounded-full">
 						<Avatar className="h-9 w-9 border-2 border-primary">
+							{user.image && <AvatarImage src={user.image} alt={user.name} />}
 							<AvatarFallback className="bg-primary text-primary-foreground font-semibold">
 								{initials}
 							</AvatarFallback>
@@ -37,20 +46,19 @@ export function UserAvatar() {
 				<DropdownMenuContent align="end" className="w-56">
 					<DropdownMenuLabel className="font-normal">
 						<div className="flex flex-col space-y-1">
-							<p className="text-sm font-medium leading-none">
-								{user.firstName} {user.lastName}
-							</p>
+							<p className="text-sm font-medium leading-none">{user.name}</p>
 							<p className="text-xs leading-none text-muted-foreground">
 								{user.email}
 							</p>
-							{user.phone && (
-								<p className="text-xs leading-none text-muted-foreground">
-									{user.phone}
-								</p>
-							)}
 							<p className="text-xs leading-none text-muted-foreground/70 mt-1">
 								{t("nav.userId") || "ID"}: {user.id.slice(0, 8)}...
 							</p>
+							{session.session && (
+								<p className="text-xs leading-none text-muted-foreground/60 mt-1">
+									{t("nav.sessionId") || "Session"}:{" "}
+									{session.session.id.slice(0, 8)}...
+								</p>
+							)}
 						</div>
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
@@ -59,7 +67,7 @@ export function UserAvatar() {
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
-						onClick={signOut}
+						onClick={logout}
 						className="text-destructive focus:text-destructive"
 					>
 						{t("nav.signOut")}
@@ -69,7 +77,7 @@ export function UserAvatar() {
 		);
 	}
 
-	// Guest session
+	// Guest session (fallback to old guest email system)
 	if (guestEmail) {
 		const guestInitials = guestEmail[0].toUpperCase();
 
@@ -99,7 +107,7 @@ export function UserAvatar() {
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem
-						onClick={signOut}
+						onClick={clearGuestSession}
 						className="text-destructive focus:text-destructive"
 					>
 						{t("nav.signOut")}

@@ -11,6 +11,7 @@ export const translations = {
 		"nav.account": "Account",
 		"nav.guestSession": "Guest Session",
 		"nav.userId": "ID",
+		"nav.sessionId": "Session",
 
 		// Home/Events
 		"home.title": "Discover Amazing Events",
@@ -192,6 +193,7 @@ export const translations = {
 		"nav.account": "Cuenta",
 		"nav.guestSession": "Sesión de Invitado",
 		"nav.userId": "ID",
+		"nav.sessionId": "Sesión",
 
 		// Inicio/Eventos
 		"home.title": "Descubre Eventos Increíbles",
