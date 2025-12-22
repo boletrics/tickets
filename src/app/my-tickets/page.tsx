@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLocale } from "@/hooks/use-locale";
 import { useThemeEffect } from "@/hooks/use-theme";
 import { useAuthStore } from "@/lib/auth-store";
+import { getAuthLoginUrl } from "@/lib/auth/config";
 import type { Order, Event } from "@/lib/types";
 
 // TODO: Replace with actual API calls
@@ -29,7 +30,9 @@ export default function MyTicketsPage() {
 
 	// Redirect if not authenticated
 	if (!user && !guestEmail) {
-		router.push("/auth");
+		if (typeof window !== "undefined") {
+			window.location.href = getAuthLoginUrl(window.location.href);
+		}
 		return null;
 	}
 

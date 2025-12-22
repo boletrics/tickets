@@ -13,7 +13,10 @@ export default defineConfig({
 			reportsDirectory: "coverage",
 			// Keep strict global thresholds, but only measure the domain logic we currently test.
 			// (UI/App Router files tend to be covered by e2e/visual tests, not unit tests.)
-			include: ["src/lib/api/**/*.{ts,tsx}"],
+			include: [
+				"src/lib/api/**/*.{ts,tsx}",
+				"src/lib/auth/**/*.{ts,tsx}",
+			],
 			exclude: [
 				"**/*.d.ts",
 				"**/*.test.*",
