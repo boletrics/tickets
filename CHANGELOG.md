@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/boletrics/tickets/compare/v1.0.0...v1.1.0) (2025-12-22)
+
+
+### Features
+
+* Add auth module and update coverage ([cbc2193](https://github.com/boletrics/tickets/commit/cbc2193b3b3e55bf50aac83d9dc7cbfaf5a19161))
+* Implement auth using better-auth and nanostores ([b07ab1f](https://github.com/boletrics/tickets/commit/b07ab1f7af94a32a829dafcf282dd6b178ce9198))
+
 # 1.0.0 (2025-12-18)
 
 
