@@ -20,6 +20,14 @@ export function UserAvatar() {
 	const { t } = useLocale();
 	const { user, signOut } = useAuthStore();
 
+	// Get current page URL for redirect after login
+	const getCurrentUrl = () => {
+		if (typeof window !== "undefined") {
+			return window.location.href;
+		}
+		return undefined;
+	};
+
 	// Guest avatar (not signed in) - show dropdown with sign in option
 	if (!user) {
 		return (
@@ -46,7 +54,7 @@ export function UserAvatar() {
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<a href={getAuthLoginUrl()} target="_self">
+						<a href={getAuthLoginUrl(getCurrentUrl())} target="_self">
 							{t("nav.signIn")}
 						</a>
 					</DropdownMenuItem>
