@@ -55,7 +55,11 @@ describe("auth/actions", () => {
 			const onSuccessCallback = vi.mocked(authClient.signOut).mock.calls[0]?.[0]
 				?.fetchOptions?.onSuccess;
 			if (onSuccessCallback) {
-				onSuccessCallback();
+				onSuccessCallback({
+					data: undefined,
+					response: {} as Response,
+					request: {} as Request,
+				} as any);
 			}
 
 			expect(clearSessionSpy).toHaveBeenCalled();
@@ -94,7 +98,11 @@ describe("auth/actions", () => {
 			const onSuccessCallback = vi.mocked(authClient.signOut).mock.calls[0]?.[0]
 				?.fetchOptions?.onSuccess;
 			if (onSuccessCallback) {
-				onSuccessCallback();
+				onSuccessCallback({
+					data: undefined,
+					response: {} as Response,
+					request: {} as Request,
+				} as any);
 			}
 
 			expect(window.location.href).toBe(`${customAuthUrl}/login`);

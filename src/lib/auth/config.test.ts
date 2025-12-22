@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-	getAuthServiceUrl,
-	getAuthAppUrl,
-	getAuthLoginUrl,
-} from "./config";
+import { getAuthServiceUrl, getAuthAppUrl, getAuthLoginUrl } from "./config";
 
 describe("auth/config", () => {
 	describe("getAuthServiceUrl", () => {
@@ -11,11 +7,11 @@ describe("auth/config", () => {
 			const prev = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
 
 			try {
-				process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = "https://custom-auth-svc.example.com";
+				process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
+					"https://custom-auth-svc.example.com";
 				expect(getAuthServiceUrl()).toBe("https://custom-auth-svc.example.com");
 			} finally {
-				if (prev === undefined)
-					delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
+				if (prev === undefined) delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
 				else process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = prev;
 			}
 		});
@@ -29,8 +25,7 @@ describe("auth/config", () => {
 					"https://auth-svc.example.workers.dev",
 				);
 			} finally {
-				if (prev === undefined)
-					delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
+				if (prev === undefined) delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
 				else process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = prev;
 			}
 		});
@@ -41,7 +36,8 @@ describe("auth/config", () => {
 			const prev = process.env.NEXT_PUBLIC_AUTH_APP_URL;
 
 			try {
-				process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://custom-auth.example.com";
+				process.env.NEXT_PUBLIC_AUTH_APP_URL =
+					"https://custom-auth.example.com";
 				expect(getAuthAppUrl()).toBe("https://custom-auth.example.com");
 			} finally {
 				if (prev === undefined) delete process.env.NEXT_PUBLIC_AUTH_APP_URL;
@@ -87,7 +83,8 @@ describe("auth/config", () => {
 			const prev = process.env.NEXT_PUBLIC_AUTH_APP_URL;
 
 			try {
-				process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://custom-auth.example.com";
+				process.env.NEXT_PUBLIC_AUTH_APP_URL =
+					"https://custom-auth.example.com";
 				const url = getAuthLoginUrl("https://example.com");
 				expect(url).toBe(
 					"https://custom-auth.example.com/login?redirect_to=https%3A%2F%2Fexample.com",

@@ -129,7 +129,10 @@ describe("auth/sessionStore", () => {
 			setSession(mockSession);
 
 			expect(notifiedValue).not.toBeNull();
-			expect(notifiedValue?.data).toEqual(mockSession);
+			expect(notifiedValue).toBeTruthy();
+			// Type assertion needed because TypeScript can't narrow the type properly
+			const state = notifiedValue as unknown as SessionState;
+			expect(state.data).toEqual(mockSession);
 
 			unsubscribe();
 		});
