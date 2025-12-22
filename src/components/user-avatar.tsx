@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 import { useLocale } from "@/hooks/use-locale";
 import { useAuthStore } from "@/lib/auth-store";
+import { getAuthLoginUrl } from "@/lib/auth/config";
 
 export function UserAvatar() {
 	const { t } = useLocale();
@@ -45,7 +46,9 @@ export function UserAvatar() {
 					</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem asChild>
-						<Link href="/auth">{t("nav.signIn")}</Link>
+						<a href={getAuthLoginUrl()} target="_self">
+							{t("nav.signIn")}
+						</a>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>

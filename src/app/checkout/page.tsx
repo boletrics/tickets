@@ -17,6 +17,7 @@ import { useLocale } from "@/hooks/use-locale";
 import { useThemeEffect } from "@/hooks/use-theme";
 import { useAuthStore } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
+import { getAuthLoginUrl } from "@/lib/auth/config";
 import type { Order } from "@/lib/types";
 
 // TODO: Replace with actual API call
@@ -190,9 +191,16 @@ export default function CheckoutPage() {
 											<AlertCircle className="h-4 w-4" />
 											<AlertDescription>
 												{t("auth.continueAsGuest")}{" "}
-												<Link href="/auth" className="font-medium underline">
+												<a
+													href={getAuthLoginUrl(
+														typeof window !== "undefined"
+															? window.location.href
+															: undefined,
+													)}
+													className="font-medium underline"
+												>
 													{t("auth.signIn")}
-												</Link>
+												</a>
 											</AlertDescription>
 										</Alert>
 									)}
