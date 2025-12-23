@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/boletrics/tickets/compare/v1.1.0...v1.2.0) (2025-12-23)
+
+
+### Features
+
+* **auth:** add useJwt hook and jwt support in http client ([ce38f45](https://github.com/boletrics/tickets/commit/ce38f45f613ee5c7820cac28493dcf71a428e784))
+
 # [1.1.0](https://github.com/boletrics/tickets/compare/v1.0.0...v1.1.0) (2025-12-22)
 
 
