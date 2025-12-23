@@ -1,0 +1,72 @@
+import type { Meta, StoryObj } from "@storybook/react";
+import { OrderSummary } from "@/components/order-summary";
+import type { Event } from "@/lib/types";
+
+const mockEvent: Event = {
+	id: "1",
+	title: "Rock Festival 2025",
+	description: "The biggest rock festival of the year",
+	category: "concert",
+	dates: [{ date: "2025-06-15", times: ["20:00"] }],
+	location: "Mexico City",
+	venue: "Foro Sol",
+	region: "mexico-city",
+	image: "/placeholder.svg",
+	artist: "Various Artists",
+	organizer: "Event Organizer",
+	ticketTypes: [
+		{
+			id: "general",
+			name: "General Admission",
+			description: "Standard entry",
+			price: 500,
+			available: 100,
+		},
+		{
+			id: "vip",
+			name: "VIP",
+			description: "Premium access",
+			price: 1500,
+			available: 20,
+		},
+	],
+	organizationId: "org-1",
+};
+
+const meta: Meta<typeof OrderSummary> = {
+	title: "Blocks/OrderSummary",
+	component: OrderSummary,
+	parameters: {
+		layout: "centered",
+		nextjs: {
+			appDirectory: true,
+		},
+	},
+	args: {
+		event: mockEvent,
+	},
+	decorators: [
+		(Story) => (
+			<div className="w-[350px]">
+				<Story />
+			</div>
+		),
+	],
+};
+
+export default meta;
+
+type Story = StoryObj<typeof OrderSummary>;
+
+export const Empty: Story = {};
+
+export const WithTickets: Story = {
+	parameters: {
+		mockData: {
+			selectedTickets: {
+				general: 2,
+				vip: 1,
+			},
+		},
+	},
+};
