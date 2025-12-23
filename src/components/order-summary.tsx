@@ -63,6 +63,7 @@ export function OrderSummary({ event }: OrderSummaryProps) {
 				eventDate: eventDate,
 				eventTime: eventTime,
 				eventLocation: event.location,
+				organizationId: event.organizationId || "",
 				ticketTypeId: ticketId,
 				ticketTypeName: ticket.name,
 				quantity,

@@ -17,6 +17,7 @@ export interface Event {
 		| "exhibition";
 	artist?: string;
 	organizer: string;
+	organizationId?: string;
 	ticketTypes: TicketType[];
 }
 

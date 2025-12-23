@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Calendar, ChevronRight, Grid3X3, List, X } from "lucide-react";
+import {
+	Calendar,
+	ChevronRight,
+	Grid3X3,
+	List,
+	Loader2,
+	X,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -12,10 +19,44 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useLocale } from "@/hooks/use-locale";
 import { useThemeEffect } from "@/hooks/use-theme";
+import { usePublicEvents } from "@/lib/api/hooks/use-events";
+import type { Event as ApiEvent } from "@/lib/api/types";
 import type { Event } from "@/lib/types";
 
-// TODO: Replace with actual API call
-const events: Event[] = [];
+// Map API event to display event format
+function mapApiEventToDisplay(apiEvent: ApiEvent): Event {
+	return {
+		id: apiEvent.id,
+		title: apiEvent.title,
+		description: apiEvent.description ?? "",
+		dates:
+			apiEvent.dates?.map((d) => ({
+				date: d.date,
+				times: [d.start_time],
+			})) ?? [],
+		location: apiEvent.venue
+			? `${apiEvent.venue.city}, ${apiEvent.venue.state}`
+			: "Location TBD",
+		venue: apiEvent.venue?.name ?? "Venue TBD",
+		region: (apiEvent.venue?.region ?? "mexico-city") as
+			| "mexico-city"
+			| "monterrey"
+			| "guadalajara"
+			| "cancun",
+		image: apiEvent.image_url ?? "/placeholder.svg?height=400&width=600",
+		category: apiEvent.category,
+		artist: apiEvent.artist ?? undefined,
+		organizer: apiEvent.organization?.name ?? "Boletrics",
+		ticketTypes:
+			apiEvent.ticket_types?.map((tt) => ({
+				id: tt.id,
+				name: tt.name,
+				price: tt.price,
+				available: tt.quantity_available,
+				description: tt.description ?? "",
+			})) ?? [],
+	};
+}
 
 const ITEMS_PER_PAGE = 24;
 
@@ -38,10 +79,31 @@ export default function SearchPage() {
 		dateRange: { from: undefined, to: undefined },
 	});
 
+	// Fetch events from API
+	const {
+		data: eventsResult,
+		isLoading,
+		error,
+	} = usePublicEvents({
+		search: searchQuery || undefined,
+		category:
+			filters.categories.length === 1
+				? (filters.categories[0] as ApiEvent["category"])
+				: undefined,
+		region: regionParam || undefined,
+		limit: 200, // Fetch more for client-side filtering
+	});
+
+	// Map API events to display format
+	const events = useMemo(() => {
+		if (!eventsResult?.data) return [];
+		return eventsResult.data.map(mapApiEventToDisplay);
+	}, [eventsResult?.data]);
+
 	const filteredEvents = useMemo(() => {
 		let filtered = events;
 
-		// Search filter
+		// Search filter (additional client-side filtering)
 		if (searchQuery.trim()) {
 			filtered = filtered.filter(
 				(event) =>
@@ -59,8 +121,8 @@ export default function SearchPage() {
 			filtered = filtered.filter((event) => event.region === regionParam);
 		}
 
-		// Category filter
-		if (filters.categories.length > 0) {
+		// Category filter (if multiple selected, filter client-side)
+		if (filters.categories.length > 1) {
 			filtered = filtered.filter((event) =>
 				filters.categories.includes(event.category),
 			);
@@ -90,6 +152,7 @@ export default function SearchPage() {
 		// Date range filter
 		if (filters.dateRange.from) {
 			filtered = filtered.filter((event) => {
+				if (!event.dates[0]?.date) return false;
 				const eventDate = new Date(event.dates[0].date);
 				const fromDate = filters.dateRange.from!;
 				const toDate = filters.dateRange.to || fromDate;
@@ -98,7 +161,7 @@ export default function SearchPage() {
 		}
 
 		return filtered;
-	}, [searchQuery, regionParam, filters]);
+	}, [searchQuery, regionParam, filters, events]);
 
 	// Pagination
 	const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
@@ -142,6 +205,7 @@ export default function SearchPage() {
 	};
 
 	const getDateDisplay = (event: Event) => {
+		if (!event.dates[0]) return "";
 		if (event.dates.length === 1 && event.dates[0].times.length === 1) {
 			return `${formatDate(event.dates[0].date)} • ${event.dates[0].times[0]}`;
 		} else if (event.dates.length === 1 && event.dates[0].times.length > 1) {
@@ -168,10 +232,19 @@ export default function SearchPage() {
 								: t("search.allEvents")}
 						</h1>
 						<p className="text-muted-foreground text-sm">
-							{filteredEvents.length}{" "}
-							{filteredEvents.length === 1
-								? t("search.event")
-								: t("search.events")}
+							{isLoading ? (
+								<span className="flex items-center gap-2">
+									<Loader2 className="h-3 w-3 animate-spin" />
+									{t("common.loading") ?? "Loading..."}
+								</span>
+							) : (
+								<>
+									{filteredEvents.length}{" "}
+									{filteredEvents.length === 1
+										? t("search.event")
+										: t("search.events")}
+								</>
+							)}
 						</p>
 					</div>
 
@@ -299,8 +372,27 @@ export default function SearchPage() {
 					</div>
 				)}
 
+				{/* Loading state */}
+				{isLoading && (
+					<div className="flex items-center justify-center py-20">
+						<Loader2 className="h-8 w-8 animate-spin text-primary" />
+					</div>
+				)}
+
+				{/* Error state */}
+				{error && !isLoading && (
+					<div className="text-center py-20">
+						<p className="text-lg text-destructive mb-2">
+							{t("errors.loadFailed") ?? "Failed to load events"}
+						</p>
+						<p className="text-muted-foreground text-sm">
+							{t("errors.tryAgain") ?? "Please try again later"}
+						</p>
+					</div>
+				)}
+
 				{/* Results */}
-				{paginatedEvents.length > 0 ? (
+				{!isLoading && !error && paginatedEvents.length > 0 && (
 					<>
 						{viewMode === "grid" ? (
 							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -333,7 +425,9 @@ export default function SearchPage() {
 												</div>
 												<div className="flex items-center justify-between">
 													<p className="text-sm font-bold text-primary">
-														{formatPrice(event.ticketTypes[0].price)}
+														{event.ticketTypes[0]
+															? formatPrice(event.ticketTypes[0].price)
+															: (t("events.priceUnavailable") ?? "Price TBD")}
 													</p>
 													<ChevronRight className="h-4 w-4 text-muted-foreground" />
 												</div>
@@ -380,7 +474,9 @@ export default function SearchPage() {
 													<div className="flex items-center justify-between mt-2">
 														<p className="text-sm md:text-base font-bold text-primary">
 															{t("events.from")}{" "}
-															{formatPrice(event.ticketTypes[0].price)}
+															{event.ticketTypes[0]
+																? formatPrice(event.ticketTypes[0].price)
+																: (t("events.priceUnavailable") ?? "Price TBD")}
 														</p>
 														<Button
 															variant="ghost"
@@ -446,7 +542,10 @@ export default function SearchPage() {
 							</div>
 						)}
 					</>
-				) : (
+				)}
+
+				{/* Empty state */}
+				{!isLoading && !error && paginatedEvents.length === 0 && (
 					<div className="text-center py-20">
 						<p className="text-lg text-muted-foreground">
 							{t("events.noEvents")}

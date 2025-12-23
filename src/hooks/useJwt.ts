@@ -51,5 +51,3 @@ export function useJwt(): UseJwtResult {
 
 	return { jwt, isLoading, error, refetch: fetchJwt };
 }
-
-
