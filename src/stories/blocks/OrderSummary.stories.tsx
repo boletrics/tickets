@@ -30,7 +30,7 @@ const mockEvent: Event = {
 			available: 20,
 		},
 	],
-	organizationId: "org-1",
+	orgId: "org-1",
 };
 
 const meta: Meta<typeof OrderSummary> = {

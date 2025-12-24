@@ -141,7 +141,7 @@ export default function CheckoutPage() {
 				name: `${firstName} ${lastName}`.trim() || email.split("@")[0],
 				phone: phone || undefined,
 				event_id: items[0].eventId,
-				organization_id: items[0].organizationId || "",
+				org_id: items[0].orgId || "",
 				items: items.map((item) => ({
 					ticket_type_id: item.ticketTypeId,
 					ticket_type_name: item.ticketTypeName,

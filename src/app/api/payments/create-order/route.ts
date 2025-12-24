@@ -9,7 +9,7 @@ export interface CreatePaymentOrderRequest {
 	name: string;
 	phone?: string;
 	event_id: string;
-	organization_id: string;
+	org_id: string; // References auth-svc organization.id
 	items: Array<{
 		ticket_type_id: string;
 		ticket_type_name: string;
@@ -31,12 +31,7 @@ export async function POST(request: NextRequest) {
 		const body = (await request.json()) as CreatePaymentOrderRequest;
 
 		// Validate required fields
-		if (
-			!body.email ||
-			!body.event_id ||
-			!body.organization_id ||
-			!body.items?.length
-		) {
+		if (!body.email || !body.event_id || !body.org_id || !body.items?.length) {
 			return NextResponse.json(
 				{ error: "Missing required fields" },
 				{ status: 400 },
@@ -50,7 +45,7 @@ export async function POST(request: NextRequest) {
 		const orderInput: CreateOrderInput = {
 			email: body.email,
 			event_id: body.event_id,
-			organization_id: body.organization_id,
+			org_id: body.org_id,
 			items: body.items.map((item) => ({
 				ticket_type_id: item.ticket_type_id,
 				quantity: item.quantity,
@@ -104,7 +99,7 @@ export async function POST(request: NextRequest) {
 					boletrics_order_id: ticketsOrder.id,
 					boletrics_order_number: ticketsOrder.order_number,
 					event_id: body.event_id,
-					organization_id: body.organization_id,
+					org_id: body.org_id,
 				},
 			});
 		} catch (error) {

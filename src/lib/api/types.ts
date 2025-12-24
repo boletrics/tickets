@@ -36,16 +36,30 @@ export interface PaginatedResult<T> {
 // Organization Types
 // ============================================================================
 
+/**
+ * Organization identity (from auth-svc).
+ * This is the source of truth for organization name, slug, logo, and membership.
+ */
 export interface Organization {
 	id: string;
 	name: string;
 	slug: string;
-	logo_url?: string | null;
-	description?: string | null;
-	website?: string | null;
+	logo?: string | null;
+	metadata?: Record<string, unknown> | null;
+	createdAt: string;
+}
+
+/**
+ * Organization settings (from tickets-svc).
+ * Ticketing-specific configuration like plan, commission, payout schedule.
+ */
+export interface OrgSettings {
+	org_id: string;
 	email: string;
 	phone?: string | null;
 	tax_id?: string | null;
+	description?: string | null;
+	website?: string | null;
 	status: "pending" | "active" | "suspended" | "inactive";
 	plan: "starter" | "professional" | "enterprise";
 	currency: "MXN" | "USD";
@@ -135,7 +149,7 @@ export interface TicketType {
 
 export interface Event {
 	id: string;
-	organization_id: string;
+	org_id: string; // References auth-svc organization.id
 	venue_id: string;
 	title: string;
 	slug: string;
@@ -152,10 +166,11 @@ export interface Event {
 	dates?: EventDate[];
 	ticket_types?: TicketType[];
 	organization?: Organization;
+	settings?: OrgSettings;
 }
 
 export interface CreateEventInput {
-	organization_id: string;
+	org_id: string; // References auth-svc organization.id
 	venue_id: string;
 	title: string;
 	slug?: string;
@@ -211,7 +226,7 @@ export interface Order {
 	user_id?: string | null;
 	email: string;
 	event_id: string;
-	organization_id: string;
+	org_id: string; // References auth-svc organization.id
 	subtotal: number;
 	fees: number;
 	tax: number;
@@ -232,7 +247,7 @@ export interface Order {
 export interface CreateOrderInput {
 	email: string;
 	event_id: string;
-	organization_id: string;
+	org_id: string; // References auth-svc organization.id
 	items: Array<{
 		ticket_type_id: string;
 		quantity: number;
@@ -320,7 +335,7 @@ export interface PlatformAnalytics {
 // ============================================================================
 
 export interface EventsQueryParams {
-	organization_id?: string;
+	org_id?: string; // References auth-svc organization.id
 	status?: EventStatus;
 	category?: EventCategory;
 	region?: string;
@@ -331,7 +346,7 @@ export interface EventsQueryParams {
 }
 
 export interface OrdersQueryParams {
-	organization_id?: string;
+	org_id?: string; // References auth-svc organization.id
 	event_id?: string;
 	user_id?: string;
 	status?: OrderStatus;

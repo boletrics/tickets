@@ -21,16 +21,16 @@ import type {
  * Fetch orders for an organization (for partner dashboard).
  */
 export function useOrganizationOrders(
-	organizationId: string | null,
-	params: Omit<OrdersQueryParams, "organization_id"> = {},
+	orgId: string | null,
+	params: Omit<OrdersQueryParams, "org_id"> = {},
 ) {
 	const queryString = buildQueryString({
 		...params,
-		organization_id: organizationId ?? undefined,
+		org_id: orgId ?? undefined,
 	});
 
 	return useApiQuery<PaginatedResult<Order>>(
-		organizationId ? `/orders${queryString}` : null,
+		orgId ? `/orders${queryString}` : null,
 	);
 }
 

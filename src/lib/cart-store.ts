@@ -8,7 +8,7 @@ export interface CartItem {
 	eventDate: string;
 	eventTime: string;
 	eventLocation: string;
-	organizationId: string;
+	orgId: string; // References auth-svc organization.id
 	ticketTypeId: string;
 	ticketTypeName: string;
 	quantity: number;

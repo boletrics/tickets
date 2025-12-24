@@ -16,7 +16,7 @@ describe("Cart Store", () => {
 		eventDate: "2025-01-15",
 		eventTime: "20:00",
 		eventLocation: "Test Venue",
-		organizationId: "org-1",
+		orgId: "org-1",
 		ticketTypeId: "ticket-type-1",
 		ticketTypeName: "General",
 		quantity: 2,

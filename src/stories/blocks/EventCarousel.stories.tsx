@@ -18,7 +18,7 @@ const mockEvents: Event[] = [
 		ticketTypes: [
 			{ id: "1", name: "General", description: "", price: 500, available: 100 },
 		],
-		organizationId: "org-1",
+		orgId: "org-1",
 	},
 	{
 		id: "2",
@@ -35,7 +35,7 @@ const mockEvents: Event[] = [
 		ticketTypes: [
 			{ id: "1", name: "General", description: "", price: 800, available: 50 },
 		],
-		organizationId: "org-1",
+		orgId: "org-1",
 	},
 	{
 		id: "3",
@@ -52,7 +52,7 @@ const mockEvents: Event[] = [
 		ticketTypes: [
 			{ id: "1", name: "VIP", description: "", price: 350, available: 200 },
 		],
-		organizationId: "org-1",
+		orgId: "org-1",
 	},
 	{
 		id: "4",
@@ -75,7 +75,7 @@ const mockEvents: Event[] = [
 				available: 500,
 			},
 		],
-		organizationId: "org-1",
+		orgId: "org-1",
 	},
 ];
 

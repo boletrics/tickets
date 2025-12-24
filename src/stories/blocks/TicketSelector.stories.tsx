@@ -42,7 +42,7 @@ const mockEvent: Event = {
 			available: 5,
 		},
 	],
-	organizationId: "org-1",
+	orgId: "org-1",
 };
 
 const meta: Meta<typeof TicketSelector> = {

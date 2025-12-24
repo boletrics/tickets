@@ -37,17 +37,17 @@ export function usePublicEvents(params: EventsQueryParams = {}) {
  * Fetch all events for an organization (for partner dashboard).
  */
 export function useOrganizationEvents(
-	organizationId: string | null,
-	params: Omit<EventsQueryParams, "organization_id"> = {},
+	orgId: string | null,
+	params: Omit<EventsQueryParams, "org_id"> = {},
 ) {
 	const queryString = buildQueryString({
 		...params,
-		organization_id: organizationId ?? undefined,
+		org_id: orgId ?? undefined,
 		include: params.include ?? "venue,dates,ticket_types",
 	});
 
 	return useApiQuery<PaginatedResult<Event>>(
-		organizationId ? `/events${queryString}` : null,
+		orgId ? `/events${queryString}` : null,
 	);
 }
 
