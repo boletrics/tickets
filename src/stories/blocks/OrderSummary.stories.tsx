@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import { useEffect } from "react";
 import { OrderSummary } from "@/components/order-summary";
+import { useCartStore } from "@/lib/cart-store";
 import type { Event } from "@/lib/types";
 
 const mockEvent: Event = {
@@ -60,13 +62,34 @@ type Story = StoryObj<typeof OrderSummary>;
 
 export const Empty: Story = {};
 
+/**
+ * Decorator that sets selectedTickets in the cart store
+ */
+function WithTicketsDecorator({ children }: { children: React.ReactNode }) {
+	const setSelectedTickets = useCartStore((state) => state.setSelectedTickets);
+
+	useEffect(() => {
+		// Set mock selected tickets in the store
+		setSelectedTickets({
+			general: 2,
+			vip: 1,
+		});
+
+		// Cleanup on unmount
+		return () => {
+			setSelectedTickets({});
+		};
+	}, [setSelectedTickets]);
+
+	return <>{children}</>;
+}
+
 export const WithTickets: Story = {
-	parameters: {
-		mockData: {
-			selectedTickets: {
-				general: 2,
-				vip: 1,
-			},
-		},
-	},
+	decorators: [
+		(Story) => (
+			<WithTicketsDecorator>
+				<Story />
+			</WithTicketsDecorator>
+		),
+	],
 };

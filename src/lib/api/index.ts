@@ -4,6 +4,9 @@ export { getTicketsSvcUrl } from "./config";
 // Types
 export * from "./types";
 
+// Mappers
+export { mapApiEventToDisplay, mapApiEventsToDisplay } from "./mappers";
+
 // Client-side utilities
 export {
 	ApiError,

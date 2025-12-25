@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
 	CheckCircle,
 	Download,
+	Loader2,
 	Mail,
 	Ticket,
 	Calendar,
@@ -37,7 +38,7 @@ export default function CheckoutSuccessPage() {
 	} | null>(null);
 
 	useEffect(() => {
-		// Clear cart on successful payment
+		// Clear cart on successful payment (only run once)
 		clearCart();
 
 		// Get pending order info from localStorage
@@ -50,7 +51,8 @@ export default function CheckoutSuccessPage() {
 				// Ignore parse errors
 			}
 		}
-	}, [clearCart]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []); // Run only on mount
 
 	const formatPrice = (price: number) => {
 		return locale === "es"
@@ -99,64 +101,72 @@ export default function CheckoutSuccessPage() {
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-2 gap-4">
-								<div>
-									<p className="text-sm text-muted-foreground">
-										{t("success.orderNumber") || "Order Number"}
-									</p>
-									<p className="font-mono font-medium">
-										{orderNumber || pendingOrder?.orderNumber || "..."}
-									</p>
+							{isLoading && !pendingOrder ? (
+								<div className="flex items-center justify-center py-8">
+									<Loader2 className="h-6 w-6 animate-spin text-primary" />
 								</div>
-								<div>
-									<p className="text-sm text-muted-foreground">
-										{t("success.total") || "Total Paid"}
-									</p>
-									<p className="font-medium">
-										{order
-											? formatPrice(order.total)
-											: pendingOrder
-												? formatPrice(pendingOrder.total)
-												: "..."}
-									</p>
-								</div>
-							</div>
-
-							<Separator />
-
-							<div className="flex items-start gap-3">
-								<Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
-								<div>
-									<p className="font-medium">
-										{t("success.emailSent") || "Confirmation email sent"}
-									</p>
-									<p className="text-sm text-muted-foreground">
-										{order?.email || pendingOrder?.email || "your email"}
-									</p>
-								</div>
-							</div>
-
-							{order?.event && (
+							) : (
 								<>
+									<div className="grid grid-cols-2 gap-4">
+										<div>
+											<p className="text-sm text-muted-foreground">
+												{t("success.orderNumber") || "Order Number"}
+											</p>
+											<p className="font-mono font-medium">
+												{orderNumber || pendingOrder?.orderNumber || "..."}
+											</p>
+										</div>
+										<div>
+											<p className="text-sm text-muted-foreground">
+												{t("success.total") || "Total Paid"}
+											</p>
+											<p className="font-medium">
+												{order
+													? formatPrice(order.total)
+													: pendingOrder
+														? formatPrice(pendingOrder.total)
+														: "..."}
+											</p>
+										</div>
+									</div>
+
 									<Separator />
 
-									<div className="space-y-3">
-										<h4 className="font-medium">{order.event.title}</h4>
-										{order.event.dates?.[0] && (
-											<div className="flex items-center gap-2 text-sm text-muted-foreground">
-												<Calendar className="h-4 w-4" />
-												<span>{formatDate(order.event.dates[0].date)}</span>
-											</div>
-										)}
-										{order.event.venue && (
-											<div className="flex items-center gap-2 text-sm text-muted-foreground">
-												<MapPin className="h-4 w-4" />
-												<span>
-													{order.event.venue.name}, {order.event.venue.city}
-												</span>
-											</div>
-										)}
+									<div className="flex items-start gap-3">
+										<Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+										<div>
+											<p className="font-medium">
+												{t("success.emailSent") || "Confirmation email sent"}
+											</p>
+											<p className="text-sm text-muted-foreground">
+												{order?.email || pendingOrder?.email || "your email"}
+											</p>
+										</div>
 									</div>
+
+									{order?.event && (
+										<>
+											<Separator />
+
+											<div className="space-y-3">
+												<h4 className="font-medium">{order.event.title}</h4>
+												{order.event.dates?.[0] && (
+													<div className="flex items-center gap-2 text-sm text-muted-foreground">
+														<Calendar className="h-4 w-4" />
+														<span>{formatDate(order.event.dates[0].date)}</span>
+													</div>
+												)}
+												{order.event.venue && (
+													<div className="flex items-center gap-2 text-sm text-muted-foreground">
+														<MapPin className="h-4 w-4" />
+														<span>
+															{order.event.venue.name}, {order.event.venue.city}
+														</span>
+													</div>
+												)}
+											</div>
+										</>
+									)}
 								</>
 							)}
 						</CardContent>
