@@ -17,6 +17,7 @@ export interface Event {
 		| "exhibition";
 	artist?: string;
 	organizer: string;
+	orgId?: string; // References auth-svc organization.id
 	ticketTypes: TicketType[];
 }
 
