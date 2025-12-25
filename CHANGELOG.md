@@ -1,3 +1,12 @@
+# [1.3.0](https://github.com/boletrics/tickets/compare/v1.2.0...v1.3.0) (2025-12-25)
+
+
+### Features
+
+* add payment processing and webhook handling ([cbea078](https://github.com/boletrics/tickets/commit/cbea0786b0945d092e980f38e013c6249d344c95))
+* Add tests for API event mappers ([8169592](https://github.com/boletrics/tickets/commit/8169592c55832d02b9db4e0901bd283da791ef30))
+* **stories:** add new story components for various UI blocks ([b4f7a79](https://github.com/boletrics/tickets/commit/b4f7a79c901691af16a8667fbeca0ffa64acf9f7))
+
 # [1.2.0](https://github.com/boletrics/tickets/compare/v1.1.0...v1.2.0) (2025-12-23)
 
 
