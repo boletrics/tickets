@@ -9,42 +9,8 @@ import { useLocale } from "@/hooks/use-locale";
 import { useThemeEffect } from "@/hooks/use-theme";
 import { useRegionStore } from "@/lib/region-store";
 import { usePublicEvents } from "@/lib/api/hooks/use-events";
+import { mapApiEventToDisplay } from "@/lib/api/mappers";
 import type { Event } from "@/lib/api/types";
-
-// Map API Event type to component Event type
-function mapApiEventToDisplay(event: Event) {
-	return {
-		id: event.id,
-		title: event.title,
-		description: event.description ?? "",
-		dates:
-			event.dates?.map((d) => ({
-				date: d.date,
-				times: [d.start_time],
-			})) ?? [],
-		location: event.venue
-			? `${event.venue.city}, ${event.venue.state}`
-			: "Location TBD",
-		venue: event.venue?.name ?? "Venue TBD",
-		region: (event.venue?.region ?? "mexico-city") as
-			| "mexico-city"
-			| "monterrey"
-			| "guadalajara"
-			| "cancun",
-		image: event.image_url ?? "/placeholder.svg?height=400&width=600",
-		category: event.category,
-		artist: event.artist ?? undefined,
-		organizer: event.organization?.name ?? "Boletrics",
-		ticketTypes:
-			event.ticket_types?.map((tt) => ({
-				id: tt.id,
-				name: tt.name,
-				price: tt.price,
-				available: tt.quantity_available,
-				description: tt.description ?? "",
-			})) ?? [],
-	};
-}
 
 interface HomePageClientProps {
 	initialEvents: Event[];

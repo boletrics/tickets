@@ -36,7 +36,7 @@ export default function CheckoutPage() {
 	const router = useRouter();
 	const { t, locale } = useLocale();
 	const { user, setGuestEmail } = useAuthStore();
-	const { items, getSubtotal, getFees, getTotal, clearCart } = useCartStore();
+	const { items, getSubtotal, getFees, getTotal } = useCartStore();
 	const { toast } = useToast();
 
 	const [email, setEmail] = useState(user?.email || "");

@@ -125,7 +125,10 @@ export const SingleEvent: Story = {
 export const ManyEvents: Story = {
 	args: {
 		title: "All Events",
-		events: [...mockEvents, ...mockEvents],
+		events: [
+			...mockEvents,
+			...mockEvents.map((e) => ({ ...e, id: `${e.id}-copy` })),
+		],
 	},
 };
 
