@@ -3,7 +3,14 @@
 import type React from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CreditCard, Mail, AlertCircle } from "lucide-react";
+import {
+	ArrowLeft,
+	CreditCard,
+	Mail,
+	AlertCircle,
+	Loader2,
+	ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
@@ -18,18 +25,18 @@ import { useThemeEffect } from "@/hooks/use-theme";
 import { useAuthStore } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
 import { getAuthLoginUrl } from "@/lib/auth/config";
-import type { Order } from "@/lib/types";
-
-// TODO: Replace with actual API call
-const orders: Order[] = [];
 import { useToast } from "@/hooks/use-toast";
+import type {
+	CreatePaymentOrderRequest,
+	CreatePaymentOrderResponse,
+} from "@/app/api/payments/create-order/route";
 
 export default function CheckoutPage() {
 	useThemeEffect();
 	const router = useRouter();
 	const { t, locale } = useLocale();
 	const { user, setGuestEmail } = useAuthStore();
-	const { items, getSubtotal, getFees, getTotal, clearCart } = useCartStore();
+	const { items, getSubtotal, getFees, getTotal } = useCartStore();
 	const { toast } = useToast();
 
 	const [email, setEmail] = useState(user?.email || "");
@@ -37,16 +44,13 @@ export default function CheckoutPage() {
 	const [lastName, setLastName] = useState(user?.lastName || "");
 	const [phone, setPhone] = useState(user?.phone || "");
 
-	const [cardNumber, setCardNumber] = useState("");
-	const [expiryDate, setExpiryDate] = useState("");
-	const [cvv, setCvv] = useState("");
-
 	const [needsVerification, setNeedsVerification] = useState(!user);
 	const [otpCode, setOtpCode] = useState("");
 	const [otpSent, setOtpSent] = useState(false);
 
 	const [createAccount, setCreateAccount] = useState(false);
 	const [processing, setProcessing] = useState(false);
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 
 	const subtotal = getSubtotal();
 	const fees = getFees();
@@ -76,7 +80,7 @@ export default function CheckoutPage() {
 		});
 
 		// In demo, the OTP is always "123456"
-		console.log("[v0] Demo OTP code: 123456");
+		console.log("[Demo] OTP code: 123456");
 	};
 
 	const handleVerifyOTP = () => {
@@ -96,7 +100,7 @@ export default function CheckoutPage() {
 		}
 	};
 
-	const handleCompleteOrder = async (e: React.FormEvent) => {
+	const handleProceedToPayment = async (e: React.FormEvent) => {
 		e.preventDefault();
 
 		if (needsVerification) {
@@ -109,38 +113,84 @@ export default function CheckoutPage() {
 			return;
 		}
 
+		if (!acceptedTerms) {
+			toast({
+				variant: "destructive",
+				title: t("common.error"),
+				description:
+					t("checkout.acceptTerms") || "Please accept the terms and conditions",
+			});
+			return;
+		}
+
+		if (items.length === 0) {
+			toast({
+				variant: "destructive",
+				title: t("common.error"),
+				description: t("checkout.emptyCart") || "Your cart is empty",
+			});
+			return;
+		}
+
 		setProcessing(true);
 
-		// Simulate payment processing
-		setTimeout(() => {
-			const orderId = `ORD-${Date.now()}`;
-
-			const order = {
-				id: orderId,
-				userId: user?.id,
+		try {
+			// Prepare the order request
+			const orderRequest: CreatePaymentOrderRequest = {
 				email: email,
-				eventId: items[0]?.eventId || "",
-				tickets: items.map((item) => ({
-					ticketTypeId: item.ticketTypeId,
+				name: `${firstName} ${lastName}`.trim() || email.split("@")[0],
+				phone: phone || undefined,
+				event_id: items[0].eventId,
+				org_id: items[0].orgId || "",
+				items: items.map((item) => ({
+					ticket_type_id: item.ticketTypeId,
+					ticket_type_name: item.ticketTypeName,
 					quantity: item.quantity,
 					price: item.price,
 				})),
-				total,
-				createdAt: new Date().toISOString(),
 			};
 
-			// TODO: Replace with actual API call
-			orders.push(order);
-			clearCart();
-
-			toast({
-				title: t("success.title"),
-				description: t("success.message"),
+			// Call the payment API
+			const response = await fetch("/api/payments/create-order", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(orderRequest),
 			});
 
-			router.push(`/success?orderId=${orderId}`);
+			if (!response.ok) {
+				const errorBody = (await response.json()) as { error?: string };
+				throw new Error(errorBody.error || "Payment initialization failed");
+			}
+
+			const result: CreatePaymentOrderResponse = await response.json();
+
+			// Store order info for success page
+			localStorage.setItem(
+				"pendingOrder",
+				JSON.stringify({
+					orderId: result.order_id,
+					orderNumber: result.order_number,
+					total: result.total,
+					email: email,
+				}),
+			);
+
+			// Redirect to Conekta checkout
+			window.location.href = result.checkout_url;
+		} catch (error) {
+			console.error("Payment error:", error);
+			toast({
+				variant: "destructive",
+				title: t("common.error"),
+				description:
+					error instanceof Error
+						? error.message
+						: t("checkout.paymentError") || "Payment initialization failed",
+			});
 			setProcessing(false);
-		}, 2000);
+		}
 	};
 
 	if (items.length === 0) {
@@ -176,7 +226,7 @@ export default function CheckoutPage() {
 					<div className="lg:col-span-2">
 						<h1 className="text-3xl font-bold mb-8">{t("checkout.title")}</h1>
 
-						<form onSubmit={handleCompleteOrder} className="space-y-8">
+						<form onSubmit={handleProceedToPayment} className="space-y-8">
 							{/* Contact Information */}
 							<Card>
 								<CardHeader>
@@ -334,66 +384,75 @@ export default function CheckoutPage() {
 									</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-4">
-									<div className="space-y-2">
-										<Label htmlFor="cardNumber">
-											{t("checkout.cardNumber")}
-										</Label>
-										<Input
-											id="cardNumber"
-											type="text"
-											placeholder="4242 4242 4242 4242"
-											value={cardNumber}
-											onChange={(e) => setCardNumber(e.target.value)}
-											maxLength={19}
-											required
+									<div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50 border">
+										<ShieldCheck className="h-8 w-8 text-primary" />
+										<div>
+											<p className="font-medium">
+												{t("checkout.securePayment") ||
+													"Secure payment with Conekta"}
+											</p>
+											<p className="text-sm text-muted-foreground">
+												{t("checkout.securePaymentDesc") ||
+													"You'll be redirected to Conekta's secure checkout to complete your payment."}
+											</p>
+										</div>
+									</div>
+
+									<div className="flex flex-wrap gap-2 justify-center py-2">
+										<img
+											src="/visa.svg"
+											alt="Visa"
+											className="h-8 opacity-80"
+										/>
+										<img
+											src="/mastercard.svg"
+											alt="Mastercard"
+											className="h-8 opacity-80"
+										/>
+										<img
+											src="/amex.svg"
+											alt="American Express"
+											className="h-8 opacity-80"
 										/>
 									</div>
 
-									<div className="grid grid-cols-2 gap-4">
-										<div className="space-y-2">
-											<Label htmlFor="expiryDate">
-												{t("checkout.expiryDate")}
-											</Label>
-											<Input
-												id="expiryDate"
-												type="text"
-												placeholder="MM/YY"
-												value={expiryDate}
-												onChange={(e) => setExpiryDate(e.target.value)}
-												maxLength={5}
-												required
-											/>
-										</div>
-										<div className="space-y-2">
-											<Label htmlFor="cvv">{t("checkout.cvv")}</Label>
-											<Input
-												id="cvv"
-												type="text"
-												placeholder="123"
-												value={cvv}
-												onChange={(e) => setCvv(e.target.value)}
-												maxLength={4}
-												required
-											/>
-										</div>
-									</div>
-
-									<p className="text-xs text-muted-foreground">
-										{t("checkout.securePayment") ||
-											"Your payment information is encrypted and secure. We never store your card details."}
+									<p className="text-xs text-muted-foreground text-center">
+										{t("checkout.installments") ||
+											"Pay in up to 12 monthly installments with participating cards"}
 									</p>
 								</CardContent>
 							</Card>
+
+							{/* Terms */}
+							<div className="flex items-start space-x-2">
+								<Checkbox
+									id="acceptTerms"
+									checked={acceptedTerms}
+									onCheckedChange={(v) => setAcceptedTerms(v as boolean)}
+								/>
+								<Label
+									htmlFor="acceptTerms"
+									className="text-sm cursor-pointer leading-normal"
+								>
+									{t("checkout.acceptTermsLabel") ||
+										"I accept the terms and conditions and the privacy policy. I understand that my tickets will be sent to the email provided."}
+								</Label>
+							</div>
 
 							<Button
 								type="submit"
 								size="lg"
 								className="w-full"
-								disabled={processing || needsVerification}
+								disabled={processing || needsVerification || !acceptedTerms}
 							>
-								{processing
-									? t("checkout.processing")
-									: `${t("checkout.completeOrder")} • ${formatPrice(total)}`}
+								{processing ? (
+									<>
+										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+										{t("checkout.processing") || "Processing..."}
+									</>
+								) : (
+									`${t("checkout.proceedToPayment") || "Proceed to Payment"} • ${formatPrice(total)}`
+								)}
 							</Button>
 						</form>
 					</div>

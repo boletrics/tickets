@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import { getServerSession } from "@/lib/auth/getServerSession";
 import { SessionHydrator } from "@/lib/auth/useAuthSession";
+import { SwrProvider } from "@/lib/api/swr-provider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -41,7 +42,9 @@ export default async function RootLayout({
 	return (
 		<html lang="en">
 			<body className={`font-sans antialiased`}>
-				<SessionHydrator serverSession={session}>{children}</SessionHydrator>
+				<SessionHydrator serverSession={session}>
+					<SwrProvider>{children}</SwrProvider>
+				</SessionHydrator>
 			</body>
 		</html>
 	);
