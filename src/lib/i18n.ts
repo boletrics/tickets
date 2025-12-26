@@ -27,6 +27,8 @@ export const translations = {
 		"events.viewDetails": "View Details",
 		"events.from": "From",
 		"events.noEvents": "No events found",
+		"events.dateNotSet": "Date TBD",
+		"events.priceNotSet": "Price TBD",
 
 		// Categories
 		"categories.concert": "Concerts",
@@ -208,6 +210,8 @@ export const translations = {
 		"events.viewDetails": "Ver Detalles",
 		"events.from": "Desde",
 		"events.noEvents": "No se encontraron eventos",
+		"events.dateNotSet": "Fecha por confirmar",
+		"events.priceNotSet": "Precio por confirmar",
 
 		// Categorías
 		"categories.concert": "Conciertos",

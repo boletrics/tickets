@@ -134,12 +134,19 @@ export function EventCarousel({
 								</h3>
 								<div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
 									<Calendar className="h-3 w-3" />
-									<span>{formatDate(event.dates[0].date)}</span>
+									<span>
+										{event.dates[0]?.date
+											? formatDate(event.dates[0].date)
+											: t("events.dateNotSet")}
+									</span>
 									<span>•</span>
 									<span className="truncate">{event.venue}</span>
 								</div>
 								<p className="text-sm font-bold text-primary">
-									{t("events.from")} {formatPrice(event.ticketTypes[0].price)}
+									{t("events.from")}{" "}
+									{event.ticketTypes[0]?.price != null
+										? formatPrice(event.ticketTypes[0].price)
+										: t("events.priceNotSet")}
 								</p>
 							</CardContent>
 						</Card>

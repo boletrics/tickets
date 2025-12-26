@@ -1,5 +1,5 @@
 import { serverGet, buildQueryString } from "@/lib/api/server";
-import type { Event, PaginatedResult } from "@/lib/api/types";
+import type { Event } from "@/lib/api/types";
 import { HomePageClient } from "./home-page-client";
 
 /**
@@ -14,10 +14,7 @@ async function getInitialEvents(): Promise<Event[]> {
 			limit: 50,
 		});
 
-		const result = await serverGet<PaginatedResult<Event>>(
-			`/events${queryString}`,
-		);
-		return result.data ?? [];
+		return await serverGet<Event[]>(`/events${queryString}`);
 	} catch (error) {
 		console.error("Failed to fetch events:", error);
 		// Return empty array on error - the page will show empty state

@@ -62,9 +62,9 @@ export default function SearchPage() {
 
 	// Map API events to display format
 	const events = useMemo(() => {
-		if (!eventsResult?.data) return [];
-		return eventsResult.data.map(mapApiEventToDisplay);
-	}, [eventsResult?.data]);
+		if (!eventsResult) return [];
+		return eventsResult.map(mapApiEventToDisplay);
+	}, [eventsResult]);
 
 	const filteredEvents = useMemo(() => {
 		let filtered = events;

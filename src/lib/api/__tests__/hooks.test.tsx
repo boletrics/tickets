@@ -37,12 +37,14 @@ describe("API Hooks", () => {
 
 	describe("usePublicEvents", () => {
 		it("should fetch events successfully", async () => {
-			const mockEvents = {
-				data: [
+			// API returns { success: true, result: [...] } - client extracts result
+			const mockApiResponse = {
+				success: true,
+				result: [
 					{ id: "1", title: "Event 1" },
 					{ id: "2", title: "Event 2" },
 				],
-				pagination: { page: 1, limit: 10, total: 2, totalPages: 1 },
+				result_info: { page: 1, per_page: 10, count: 2, total_count: 2 },
 			};
 
 			mockFetch.mockResolvedValueOnce({
@@ -50,7 +52,7 @@ describe("API Hooks", () => {
 				headers: {
 					get: () => "application/json",
 				},
-				json: async () => mockEvents,
+				json: async () => mockApiResponse,
 			});
 
 			const { result } = renderHook(() => usePublicEvents(), {
@@ -64,8 +66,8 @@ describe("API Hooks", () => {
 				expect(result.current.isLoading).toBe(false);
 			});
 
-			expect(result.current.data?.data).toHaveLength(2);
-			expect(result.current.data?.data?.[0].title).toBe("Event 1");
+			expect(result.current.data).toHaveLength(2);
+			expect(result.current.data?.[0].title).toBe("Event 1");
 		});
 
 		it("should handle fetch errors", async () => {
