@@ -106,6 +106,8 @@ export function EventDetailClient({ event }: EventDetailClientProps) {
 								fill
 								className="object-cover"
 								priority
+								placeholder={event.imageBlur ? "blur" : "empty"}
+								blurDataURL={event.imageBlur}
 							/>
 							<Badge
 								className={`absolute top-4 right-4 ${getCategoryColor(event.category)}`}

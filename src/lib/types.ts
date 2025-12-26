@@ -7,6 +7,7 @@ export interface Event {
 	venue: string;
 	region: "mexico-city" | "monterrey" | "guadalajara" | "cancun";
 	image: string;
+	imageBlur?: string; // Base64 blur placeholder for Next.js Image
 	category:
 		| "concert"
 		| "sports"

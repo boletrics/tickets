@@ -157,6 +157,7 @@ export interface Event {
 	category: EventCategory;
 	artist?: string | null;
 	image_url?: string | null;
+	image_blur?: string | null; // Base64 blur placeholder for Next.js blurDataURL
 	status: EventStatus;
 	published_at?: string | null;
 	created_at: string;

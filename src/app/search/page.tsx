@@ -371,6 +371,8 @@ export default function SearchPage() {
 													alt={event.title}
 													fill
 													className="object-cover group-hover:scale-105 transition-transform duration-300"
+													placeholder={event.imageBlur ? "blur" : "empty"}
+													blurDataURL={event.imageBlur}
 												/>
 												<Badge
 													className={`absolute top-2 right-2 text-xs ${getCategoryColor(event.category)}`}
@@ -414,6 +416,8 @@ export default function SearchPage() {
 														alt={event.title}
 														fill
 														className="object-cover"
+														placeholder={event.imageBlur ? "blur" : "empty"}
+														blurDataURL={event.imageBlur}
 													/>
 												</div>
 												<CardContent className="flex-1 p-3 md:p-4 flex flex-col justify-between">
