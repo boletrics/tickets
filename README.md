@@ -1,63 +1,101 @@
-# Next.js Framework Starter
+# Boletrics Tickets
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/algtools/next-template)
+The **Tickets** application is the customer-facing ticketing portal for Boletrics, built with [Next.js](https://nextjs.org/) and deployed on [Cloudflare Workers](https://workers.cloudflare.com/) via [OpenNext](https://opennext.js.org/).
 
-<!-- dash-content-start -->
+## Overview
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). It's deployed on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+This application serves as the public marketplace where customers can discover events, purchase tickets, and manage their orders:
 
-This template uses [OpenNext](https://opennext.js.org/) via the [OpenNext Cloudflare adapter](https://opennext.js.org/cloudflare), which works by taking the Next.js build output and transforming it, so that it can run in Cloudflare Workers.
+- **Event Discovery** - Browse and search for events
+- **Event Details** - View event information, dates, venues, and ticket options
+- **Ticket Purchase** - Select ticket types and complete purchases
+- **Order Confirmation** - Purchase success flow with order details
+- **My Tickets** - View upcoming and past tickets with QR codes
+- **Ticket Management** - Download tickets, email tickets, view QR codes
+- **Multi-language Support** - English and Spanish (es-MX) localization
 
-<!-- dash-content-end -->
+## Tech Stack
 
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/next-starter-template
-```
-
-A live public deployment of this template is available at [https://next-starter-template.templates.workers.dev](https://next-starter-template.templates.workers.dev)
+- **Framework**: Next.js 16 with React 19
+- **Styling**: Tailwind CSS 4 with shadcn/ui components
+- **State Management**: Zustand + Nanostores
+- **Form Handling**: React Hook Form + Zod validation
+- **Data Fetching**: SWR
+- **Charts**: Recharts
+- **Authentication**: Better Auth integration (with guest checkout support)
+- **Testing**: Vitest + React Testing Library
+- **Visual Testing**: Storybook
+- **Deployment**: Cloudflare Workers via OpenNext
 
 ## Getting Started
 
-First, run:
+### Prerequisites
+
+- Node.js 20+
+- pnpm 10+
+
+### Installation
 
 ```bash
-npm install
-# or
-yarn install
-# or
 pnpm install
-# or
-bun install
 ```
 
-Then run the development server (using the package manager of your choice):
+### Development
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Available Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+| Command             | Description                                    |
+| :------------------ | :--------------------------------------------- |
+| `pnpm dev`          | Start development server on port 3001          |
+| `pnpm build`        | Build for production                           |
+| `pnpm preview`      | Preview production build locally               |
+| `pnpm deploy`       | Build and deploy to Cloudflare Workers         |
+| `pnpm lint`         | Run ESLint                                     |
+| `pnpm format`       | Format code with Prettier                      |
+| `pnpm format:check` | Check code formatting                          |
+| `pnpm typecheck`    | Run TypeScript type checking                   |
+| `pnpm test`         | Run tests with coverage                        |
+| `pnpm test:watch`   | Run tests in watch mode                        |
+| `pnpm storybook`    | Start Storybook on port 6006                   |
+| `pnpm ci:check`     | Run all CI checks (format, lint, types, tests) |
 
-## Deploying To Production
+## Project Structure
 
-| Command                           | Action                                       |
-| :-------------------------------- | :------------------------------------------- |
-| `npm run build`                   | Build your production site                   |
-| `npm run preview`                 | Preview your build locally, before deploying |
-| `npm run build && npm run deploy` | Deploy your production site to Cloudflare    |
-| `npm wrangler tail`               | View real-time logs for all Workers          |
+```
+tickets/
+├── src/
+│   ├── app/
+│   │   ├── page.tsx            # Home page (event discovery)
+│   │   ├── events/[id]/        # Event details page
+│   │   ├── search/             # Event search
+│   │   ├── my-tickets/         # User's tickets
+│   │   ├── success/            # Order confirmation
+│   │   └── auth/               # Auth callback handling
+│   ├── components/
+│   │   ├── header.tsx          # Site header
+│   │   ├── event-card.tsx      # Event display card
+│   │   └── ui/                 # shadcn/ui components
+│   ├── hooks/                  # Custom React hooks (locale, theme, toast)
+│   ├── lib/
+│   │   ├── api/                # API clients and hooks
+│   │   ├── auth/               # Auth configuration
+│   │   └── auth-store.ts       # Auth state management
+│   ├── stories/                # Storybook stories
+│   └── test/                   # Test utilities
+├── public/                     # Static assets (event images, icons)
+└── wrangler.jsonc              # Cloudflare Workers configuration
+```
 
-## Learn More
+## Related Services
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- **auth-svc** - Authentication backend service
+- **tickets-svc** - Ticketing backend service (event data, orders, tickets)
+- **auth** - Authentication frontend (login, signup, account)
+- **partner** - Organization dashboard (for event organizers)
+- **admin** - Platform administration dashboard
