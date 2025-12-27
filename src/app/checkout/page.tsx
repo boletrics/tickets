@@ -13,6 +13,7 @@ import {
 	CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -424,12 +425,9 @@ export default function CheckoutPage() {
 															aria-label="Verification code"
 														>
 															<InputOTPGroup>
-																<InputOTPSlot index={0} />
-																<InputOTPSlot index={1} />
-																<InputOTPSlot index={2} />
-																<InputOTPSlot index={3} />
-																<InputOTPSlot index={4} />
-																<InputOTPSlot index={5} />
+																{Array.from({ length: OTP_LENGTH }, (_, i) => (
+																	<InputOTPSlot key={i} index={i} />
+																))}
 															</InputOTPGroup>
 														</InputOTP>
 													</div>
@@ -525,20 +523,26 @@ export default function CheckoutPage() {
 									</div>
 
 									<div className="flex flex-wrap gap-2 justify-center py-2">
-										<img
+										<Image
 											src="/visa.svg"
 											alt="Visa"
-											className="h-8 opacity-80"
+											width={48}
+											height={32}
+											className="opacity-80"
 										/>
-										<img
+										<Image
 											src="/mastercard.svg"
 											alt="Mastercard"
-											className="h-8 opacity-80"
+											width={48}
+											height={32}
+											className="opacity-80"
 										/>
-										<img
+										<Image
 											src="/amex.svg"
 											alt="American Express"
-											className="h-8 opacity-80"
+											width={48}
+											height={32}
+											className="opacity-80"
 										/>
 									</div>
 

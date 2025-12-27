@@ -67,7 +67,7 @@ Open [http://localhost:3001](http://localhost:3001) to view the application.
 
 ## Project Structure
 
-```
+```txt
 tickets/
 ├── src/
 │   ├── app/

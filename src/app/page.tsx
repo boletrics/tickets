@@ -4,26 +4,64 @@ import { HomePageClient } from "./home-page-client";
 
 /**
  * Enrich events with venue, dates, and ticket types data.
+ * Fetches related data in parallel, filtered by the specific events being displayed.
  */
 async function enrichEvents(events: Event[]): Promise<Event[]> {
 	if (events.length === 0) return events;
 
-	// Get unique venue IDs
+	// Get unique venue IDs and event IDs
 	const venueIds = [...new Set(events.map((e) => e.venue_id).filter(Boolean))];
 	const eventIds = events.map((e) => e.id);
 
-	// Fetch all venues, dates, and ticket types in parallel
-	const [venues, dates, ticketTypes] = await Promise.all([
+	// Fetch venues, dates, and ticket types in parallel
+	// Note: Venues are fetched individually as the API doesn't support bulk venue queries
+	// Dates and ticket types are fetched per event to avoid loading unrelated data
+	const [venues, datesResults, ticketTypesResults] = await Promise.all([
+		// Fetch venues in parallel (one request per unique venue)
 		venueIds.length > 0
 			? Promise.all(
 					venueIds.map((id) =>
-						serverGet<Venue>(`/venues/${id}`).catch(() => null),
+						serverGet<Venue>(`/venues/${id}`).catch((error) => {
+							console.warn(`Failed to fetch venue ${id}:`, error);
+							return null;
+						}),
 					),
 				)
 			: [],
-		serverGet<EventDate[]>(`/event-dates?limit=500`).catch(() => []),
-		serverGet<TicketType[]>(`/ticket-types?limit=500`).catch(() => []),
+		// Fetch dates per event in parallel (filtered by event_id)
+		eventIds.length > 0
+			? Promise.all(
+					eventIds.map((id) =>
+						serverGet<EventDate[]>(`/event-dates?event_id=${id}`).catch(
+							(error) => {
+								console.warn(`Failed to fetch dates for event ${id}:`, error);
+								return [] as EventDate[];
+							},
+						),
+					),
+				)
+			: [],
+		// Fetch ticket types per event in parallel (filtered by event_id)
+		eventIds.length > 0
+			? Promise.all(
+					eventIds.map((id) =>
+						serverGet<TicketType[]>(`/ticket-types?event_id=${id}`).catch(
+							(error) => {
+								console.warn(
+									`Failed to fetch ticket types for event ${id}:`,
+									error,
+								);
+								return [] as TicketType[];
+							},
+						),
+					),
+				)
+			: [],
 	]);
+
+	// Flatten dates and ticket types arrays
+	const dates = datesResults.flat();
+	const ticketTypes = ticketTypesResults.flat();
 
 	// Create lookup maps
 	const venueMap = new Map<string, Venue>();
