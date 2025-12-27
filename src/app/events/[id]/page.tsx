@@ -21,7 +21,8 @@ async function fetchEvent(idOrSlug: string): Promise<ApiEvent | null> {
 	if (isUUID(idOrSlug)) {
 		try {
 			return await serverGet<ApiEvent>(`/events/${idOrSlug}`);
-		} catch {
+		} catch (error) {
+			console.warn(`Failed to fetch event by ID ${idOrSlug}:`, error);
 			// ID lookup failed, will try slug below
 		}
 	}
@@ -32,7 +33,8 @@ async function fetchEvent(idOrSlug: string): Promise<ApiEvent | null> {
 		if (events && events.length > 0) {
 			return events[0];
 		}
-	} catch {
+	} catch (error) {
+		console.warn(`Failed to fetch event by slug ${idOrSlug}:`, error);
 		// Slug lookup failed
 	}
 
@@ -40,7 +42,8 @@ async function fetchEvent(idOrSlug: string): Promise<ApiEvent | null> {
 	if (!isUUID(idOrSlug)) {
 		try {
 			return await serverGet<ApiEvent>(`/events/${idOrSlug}`);
-		} catch {
+		} catch (error) {
+			console.warn(`Failed to fetch event by ID ${idOrSlug}:`, error);
 			// ID lookup failed
 		}
 	}
@@ -59,36 +62,46 @@ export default async function EventPage({ params }: PageProps) {
 			notFound();
 		}
 
-		// Fetch venue if venue_id exists
-		if (apiEvent.venue_id) {
-			try {
-				const venue = await serverGet<ApiEvent["venue"]>(
-					`/venues/${apiEvent.venue_id}`,
-				);
-				apiEvent.venue = venue;
-			} catch {
-				// Venue fetch failed, continue without it
-			}
+		// Fetch venue, ticket types, and dates in parallel for better performance
+		const [venueResult, ticketTypesResult, datesResult] =
+			await Promise.allSettled([
+				apiEvent.venue_id
+					? serverGet<ApiEvent["venue"]>(`/venues/${apiEvent.venue_id}`)
+					: Promise.resolve(null),
+				serverGet<ApiEvent["ticket_types"]>(
+					`/ticket-types?event_id=${apiEvent.id}`,
+				),
+				serverGet<ApiEvent["dates"]>(`/event-dates?event_id=${apiEvent.id}`),
+			]);
+
+		// Apply venue if fetch succeeded
+		if (venueResult.status === "fulfilled" && venueResult.value) {
+			apiEvent.venue = venueResult.value;
+		} else if (venueResult.status === "rejected") {
+			console.warn(
+				`Failed to fetch venue ${apiEvent.venue_id}:`,
+				venueResult.reason,
+			);
 		}
 
-		// Fetch ticket types for this event (use apiEvent.id in case we looked up by slug)
-		try {
-			const ticketTypes = await serverGet<ApiEvent["ticket_types"]>(
-				`/ticket-types?event_id=${apiEvent.id}`,
+		// Apply ticket types if fetch succeeded
+		if (ticketTypesResult.status === "fulfilled") {
+			apiEvent.ticket_types = ticketTypesResult.value;
+		} else {
+			console.warn(
+				`Failed to fetch ticket types for event ${apiEvent.id}:`,
+				ticketTypesResult.reason,
 			);
-			apiEvent.ticket_types = ticketTypes;
-		} catch {
-			// Ticket types fetch failed, continue without them
 		}
 
-		// Fetch event dates for this event (use apiEvent.id in case we looked up by slug)
-		try {
-			const dates = await serverGet<ApiEvent["dates"]>(
-				`/event-dates?event_id=${apiEvent.id}`,
+		// Apply dates if fetch succeeded
+		if (datesResult.status === "fulfilled") {
+			apiEvent.dates = datesResult.value;
+		} else {
+			console.warn(
+				`Failed to fetch dates for event ${apiEvent.id}:`,
+				datesResult.reason,
 			);
-			apiEvent.dates = dates;
-		} catch {
-			// Dates fetch failed, continue without them
 		}
 
 		const event = mapApiEventToDisplay(apiEvent);
