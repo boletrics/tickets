@@ -1,3 +1,12 @@
+# [1.4.0](https://github.com/boletrics/tickets/compare/v1.3.0...v1.4.0) (2025-12-27)
+
+
+### Features
+
+* add image blur placeholder support for events ([2c2b51f](https://github.com/boletrics/tickets/commit/2c2b51f7a5e30342ebdad3afb01adeb6037cb856))
+* enrich event data with venue, dates, and ticket types; improve event fetching logic ([0f980c3](https://github.com/boletrics/tickets/commit/0f980c3bf8e09e7a8e676b6da14bb9b1b08d53ec))
+* implement email OTP verification in checkout process ([444730f](https://github.com/boletrics/tickets/commit/444730f78ffcff5e17367d54e16ea246e2037857))
+
 # [1.3.0](https://github.com/boletrics/tickets/compare/v1.2.0...v1.3.0) (2025-12-25)
 
 
