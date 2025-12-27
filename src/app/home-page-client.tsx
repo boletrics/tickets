@@ -27,7 +27,7 @@ export function HomePageClient({ initialEvents }: HomePageClientProps) {
 	});
 
 	// Use API data if available, otherwise use initial SSR data
-	const apiEvents = eventsResult?.data ?? initialEvents;
+	const apiEvents = eventsResult ?? initialEvents;
 	const events = useMemo(
 		() => apiEvents.map(mapApiEventToDisplay),
 		[apiEvents],

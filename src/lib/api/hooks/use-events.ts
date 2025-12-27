@@ -12,7 +12,6 @@ import type {
 	EventsQueryParams,
 	CreateEventInput,
 	UpdateEventInput,
-	PaginatedResult,
 } from "../types";
 
 // ============================================================================
@@ -22,19 +21,20 @@ import type {
 /**
  * Fetch a list of published events (for B2C marketplace).
  * Optionally filter by category, region, search query.
+ * Note: API doesn't support include parameter for relations
  */
 export function usePublicEvents(params: EventsQueryParams = {}) {
 	const queryString = buildQueryString({
 		...params,
 		status: "published", // Only show published events on marketplace
-		include: params.include ?? "venue,dates,ticket_types",
 	});
 
-	return useApiQuery<PaginatedResult<Event>>(`/events${queryString}`);
+	return useApiQuery<Event[]>(`/events${queryString}`);
 }
 
 /**
  * Fetch all events for an organization (for partner dashboard).
+ * Note: API doesn't support include parameter for relations
  */
 export function useOrganizationEvents(
 	orgId: string | null,
@@ -43,40 +43,32 @@ export function useOrganizationEvents(
 	const queryString = buildQueryString({
 		...params,
 		org_id: orgId ?? undefined,
-		include: params.include ?? "venue,dates,ticket_types",
 	});
 
-	return useApiQuery<PaginatedResult<Event>>(
-		orgId ? `/events${queryString}` : null,
-	);
+	return useApiQuery<Event[]>(orgId ? `/events${queryString}` : null);
 }
 
 /**
  * Fetch a single event by ID.
+ * Note: API doesn't support include parameter, relations are not included
  */
 export function useEvent(eventId: string | null) {
-	return useApiQuery<Event>(
-		eventId
-			? `/events/${eventId}?include=venue,dates,ticket_types,organization`
-			: null,
-	);
+	return useApiQuery<Event>(eventId ? `/events/${eventId}` : null);
 }
 
 /**
  * Fetch a single event by slug.
+ * Note: API doesn't support include parameter, relations are not included
  */
 export function useEventBySlug(slug: string | null) {
-	const queryString = buildQueryString({
-		slug,
-		include: "venue,dates,ticket_types,organization",
-	});
+	const queryString = buildQueryString({ slug });
 
-	const { data, ...rest } = useApiQuery<PaginatedResult<Event>>(
+	const { data, ...rest } = useApiQuery<Event[]>(
 		slug ? `/events${queryString}` : null,
 	);
 
 	return {
-		data: data?.data?.[0] ?? undefined,
+		data: data?.[0] ?? undefined,
 		...rest,
 	};
 }
@@ -169,16 +161,14 @@ export function usePublishEvent(eventId: string) {
 /**
  * Poll ticket availability for an event.
  * Useful for showing real-time stock updates during checkout.
+ * Note: Fetches ticket types separately since API doesn't support include
  */
 export function useTicketAvailability(
 	eventId: string | null,
 	options?: { refreshInterval?: number },
 ) {
-	return useApiQuery<Event>(
-		eventId ? `/events/${eventId}?include=ticket_types` : null,
-		{
-			refreshInterval: options?.refreshInterval ?? 30000, // Default: 30 seconds
-			revalidateOnFocus: true,
-		},
-	);
+	return useApiQuery<Event>(eventId ? `/events/${eventId}` : null, {
+		refreshInterval: options?.refreshInterval ?? 30000, // Default: 30 seconds
+		revalidateOnFocus: true,
+	});
 }

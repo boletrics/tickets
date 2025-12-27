@@ -13,6 +13,7 @@ vi.mock("better-auth/client", () => {
 
 vi.mock("better-auth/client/plugins", () => ({
 	jwtClient: vi.fn(() => ({})),
+	emailOTPClient: vi.fn(() => ({})),
 }));
 
 import { getClientJwt, authClient } from "./authClient";

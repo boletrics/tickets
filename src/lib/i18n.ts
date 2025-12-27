@@ -21,10 +21,14 @@ export const translations = {
 		"home.viewAll": "View All",
 		"home.trending": "Trending Now",
 		"home.thisWeek": "This Week",
+		"home.noEvents": "No events available at the moment.",
+		"home.checkBackLater": "Check back later for upcoming events!",
 		"events.upcoming": "Upcoming Events",
 		"events.viewDetails": "View Details",
 		"events.from": "From",
 		"events.noEvents": "No events found",
+		"events.dateNotSet": "Date TBD",
+		"events.priceNotSet": "Price TBD",
 
 		// Categories
 		"categories.concert": "Concerts",
@@ -200,10 +204,14 @@ export const translations = {
 		"home.viewAll": "Ver Todos",
 		"home.trending": "Tendencias",
 		"home.thisWeek": "Esta Semana",
+		"home.noEvents": "No hay eventos disponibles en este momento.",
+		"home.checkBackLater": "¡Vuelve más tarde para ver próximos eventos!",
 		"events.upcoming": "Próximos Eventos",
 		"events.viewDetails": "Ver Detalles",
 		"events.from": "Desde",
 		"events.noEvents": "No se encontraron eventos",
+		"events.dateNotSet": "Fecha por confirmar",
+		"events.priceNotSet": "Precio por confirmar",
 
 		// Categorías
 		"categories.concert": "Conciertos",

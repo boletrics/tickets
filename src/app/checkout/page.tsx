@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
 	ArrowLeft,
@@ -10,6 +10,7 @@ import {
 	AlertCircle,
 	Loader2,
 	ShieldCheck,
+	CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { Header } from "@/components/header";
@@ -20,16 +21,24 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { useLocale } from "@/hooks/use-locale";
 import { useThemeEffect } from "@/hooks/use-theme";
 import { useAuthStore } from "@/lib/auth-store";
 import { useCartStore } from "@/lib/cart-store";
 import { getAuthLoginUrl } from "@/lib/auth/config";
+import { authClient } from "@/lib/auth/authClient";
 import { useToast } from "@/hooks/use-toast";
 import type {
 	CreatePaymentOrderRequest,
 	CreatePaymentOrderResponse,
 } from "@/app/api/payments/create-order/route";
+
+const OTP_LENGTH = 6;
 
 export default function CheckoutPage() {
 	useThemeEffect();
@@ -47,6 +56,9 @@ export default function CheckoutPage() {
 	const [needsVerification, setNeedsVerification] = useState(!user);
 	const [otpCode, setOtpCode] = useState("");
 	const [otpSent, setOtpSent] = useState(false);
+	const [isSendingOtp, setIsSendingOtp] = useState(false);
+	const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+	const [otpError, setOtpError] = useState<string | null>(null);
 
 	const [createAccount, setCreateAccount] = useState(false);
 	const [processing, setProcessing] = useState(false);
@@ -62,7 +74,7 @@ export default function CheckoutPage() {
 			: `$${price.toLocaleString("en-US")}`;
 	};
 
-	const handleSendOTP = () => {
+	const handleSendOTP = async () => {
 		if (!email) {
 			toast({
 				variant: "destructive",
@@ -72,33 +84,98 @@ export default function CheckoutPage() {
 			return;
 		}
 
-		setOtpSent(true);
-		toast({
-			title: t("auth.otpSent") || "Code sent",
-			description:
-				t("auth.otpSentMessage") || `Verification code sent to ${email}`,
-		});
+		setIsSendingOtp(true);
+		setOtpError(null);
 
-		// In demo, the OTP is always "123456"
-		console.log("[Demo] OTP code: 123456");
-	};
-
-	const handleVerifyOTP = () => {
-		if (otpCode === "123456") {
-			setNeedsVerification(false);
-			setGuestEmail(email);
-			toast({
-				title: t("common.success") || "Success",
-				description: t("auth.verificationSuccess") || "Verification successful",
+		try {
+			const result = await authClient.emailOtp.sendVerificationOtp({
+				email,
+				type: "email-verification",
 			});
-		} else {
+
+			if (result.error) {
+				setOtpError(result.error.message || "Failed to send code");
+				toast({
+					variant: "destructive",
+					title: t("common.error"),
+					description:
+						result.error.message || "Failed to send verification code",
+				});
+			} else {
+				setOtpSent(true);
+				toast({
+					title: t("auth.otpSent") || "Code sent",
+					description:
+						t("auth.otpSentMessage") || `Verification code sent to ${email}`,
+				});
+			}
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to send code";
+			setOtpError(message);
 			toast({
 				variant: "destructive",
 				title: t("common.error"),
-				description: t("auth.invalidOTP") || "Invalid verification code",
+				description: message,
 			});
+		} finally {
+			setIsSendingOtp(false);
 		}
 	};
+
+	const handleVerifyOTP = useCallback(async () => {
+		if (!email || otpCode.length !== OTP_LENGTH) {
+			return;
+		}
+
+		setIsVerifyingOtp(true);
+		setOtpError(null);
+
+		try {
+			const result = await authClient.emailOtp.verifyEmail({
+				email,
+				otp: otpCode,
+			});
+
+			if (result.error) {
+				setOtpError(result.error.message || "Invalid code");
+				toast({
+					variant: "destructive",
+					title: t("common.error"),
+					description:
+						result.error.message ||
+						t("auth.invalidOTP") ||
+						"Invalid verification code",
+				});
+			} else {
+				setNeedsVerification(false);
+				setGuestEmail(email);
+				toast({
+					title: t("common.success") || "Success",
+					description:
+						t("auth.verificationSuccess") || "Verification successful",
+				});
+			}
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Verification failed";
+			setOtpError(message);
+			toast({
+				variant: "destructive",
+				title: t("common.error"),
+				description: message,
+			});
+		} finally {
+			setIsVerifyingOtp(false);
+		}
+	}, [email, otpCode, setGuestEmail, t, toast]);
+
+	// Auto-submit when OTP is complete
+	useEffect(() => {
+		if (otpCode.length === OTP_LENGTH && email && !isVerifyingOtp && otpSent) {
+			handleVerifyOTP();
+		}
+	}, [otpCode, email, isVerifyingOtp, otpSent, handleVerifyOTP]);
 
 	const handleProceedToPayment = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -318,59 +395,108 @@ export default function CheckoutPage() {
 													onClick={handleSendOTP}
 													variant="outline"
 													className="w-full bg-transparent"
+													disabled={isSendingOtp || !email}
 												>
-													{t("auth.sendCode")}
+													{isSendingOtp ? (
+														<>
+															<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+															{t("common.sending") || "Sending..."}
+														</>
+													) : (
+														t("auth.sendCode") || "Send verification code"
+													)}
 												</Button>
 											) : (
-												<div className="space-y-3">
-													<Input
-														type="text"
-														placeholder={t("auth.enterOTP")}
-														value={otpCode}
-														onChange={(e) => setOtpCode(e.target.value)}
-														maxLength={6}
-														className="text-center"
-													/>
-													<p className="text-xs text-muted-foreground text-center">
-														Demo code: 123456
+												<div className="space-y-4">
+													<p className="text-sm text-muted-foreground text-center">
+														{t("auth.enterCodeSentTo") ||
+															"Enter the 6-digit code sent to"}{" "}
+														<strong>{email}</strong>
 													</p>
-													<div className="flex gap-2">
-														<Button
-															type="button"
-															onClick={handleVerifyOTP}
-															variant="default"
-															className="flex-1"
+
+													{/* OTP Input */}
+													<div className="flex justify-center">
+														<InputOTP
+															maxLength={OTP_LENGTH}
+															value={otpCode}
+															onChange={setOtpCode}
+															disabled={isVerifyingOtp}
+															aria-label="Verification code"
 														>
-															{t("auth.verifyOTP")}
-														</Button>
-														<Button
-															type="button"
-															onClick={handleSendOTP}
-															variant="outline"
-															className="flex-1 bg-transparent"
-														>
-															{t("auth.resendCode")}
-														</Button>
+															<InputOTPGroup>
+																<InputOTPSlot index={0} />
+																<InputOTPSlot index={1} />
+																<InputOTPSlot index={2} />
+																<InputOTPSlot index={3} />
+																<InputOTPSlot index={4} />
+																<InputOTPSlot index={5} />
+															</InputOTPGroup>
+														</InputOTP>
 													</div>
+
+													{isVerifyingOtp && (
+														<div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+															<Loader2 className="h-4 w-4 animate-spin" />
+															{t("common.verifying") || "Verifying..."}
+														</div>
+													)}
+
+													{otpError && (
+														<Alert variant="destructive">
+															<AlertCircle className="h-4 w-4" />
+															<AlertDescription>{otpError}</AlertDescription>
+														</Alert>
+													)}
+
+													<Button
+														type="button"
+														onClick={handleSendOTP}
+														variant="outline"
+														className="w-full bg-transparent"
+														disabled={isSendingOtp}
+													>
+														{isSendingOtp ? (
+															<>
+																<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+																{t("common.sending") || "Sending..."}
+															</>
+														) : (
+															<>
+																<Mail className="mr-2 h-4 w-4" />
+																{t("auth.resendCode") || "Resend code"}
+															</>
+														)}
+													</Button>
 												</div>
 											)}
 										</div>
 									)}
 
 									{!user && !needsVerification && (
-										<div className="flex items-center space-x-2">
-											<Checkbox
-												id="createAccount"
-												checked={createAccount}
-												onCheckedChange={(v) => setCreateAccount(v as boolean)}
-											/>
-											<Label
-												htmlFor="createAccount"
-												className="text-sm cursor-pointer"
-											>
-												{t("checkout.createAccountPrompt")}
-											</Label>
-										</div>
+										<>
+											<Alert className="bg-green-500/10 border-green-500/20">
+												<CheckCircle2 className="h-4 w-4 text-green-600" />
+												<AlertDescription className="text-green-700 dark:text-green-400">
+													{t("auth.emailVerified") ||
+														"Email verified successfully"}
+												</AlertDescription>
+											</Alert>
+											<div className="flex items-center space-x-2">
+												<Checkbox
+													id="createAccount"
+													checked={createAccount}
+													onCheckedChange={(v) =>
+														setCreateAccount(v as boolean)
+													}
+												/>
+												<Label
+													htmlFor="createAccount"
+													className="text-sm cursor-pointer"
+												>
+													{t("checkout.createAccountPrompt")}
+												</Label>
+											</div>
+										</>
 									)}
 								</CardContent>
 							</Card>

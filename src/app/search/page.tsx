@@ -62,9 +62,9 @@ export default function SearchPage() {
 
 	// Map API events to display format
 	const events = useMemo(() => {
-		if (!eventsResult?.data) return [];
-		return eventsResult.data.map(mapApiEventToDisplay);
-	}, [eventsResult?.data]);
+		if (!eventsResult) return [];
+		return eventsResult.map(mapApiEventToDisplay);
+	}, [eventsResult]);
 
 	const filteredEvents = useMemo(() => {
 		let filtered = events;
@@ -371,6 +371,8 @@ export default function SearchPage() {
 													alt={event.title}
 													fill
 													className="object-cover group-hover:scale-105 transition-transform duration-300"
+													placeholder={event.imageBlur ? "blur" : "empty"}
+													blurDataURL={event.imageBlur}
 												/>
 												<Badge
 													className={`absolute top-2 right-2 text-xs ${getCategoryColor(event.category)}`}
@@ -414,6 +416,8 @@ export default function SearchPage() {
 														alt={event.title}
 														fill
 														className="object-cover"
+														placeholder={event.imageBlur ? "blur" : "empty"}
+														blurDataURL={event.imageBlur}
 													/>
 												</div>
 												<CardContent className="flex-1 p-3 md:p-4 flex flex-col justify-between">

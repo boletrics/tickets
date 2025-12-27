@@ -43,6 +43,7 @@ export function mapApiEventToDisplay(apiEvent: ApiEvent): DisplayEvent {
 		venue: apiEvent.venue?.name ?? "Venue TBD",
 		region,
 		image: apiEvent.image_url ?? "/placeholder.svg?height=400&width=600",
+		imageBlur: apiEvent.image_blur ?? undefined,
 		category: apiEvent.category,
 		artist: apiEvent.artist ?? undefined,
 		organizer: apiEvent.organization?.name ?? "Boletrics",

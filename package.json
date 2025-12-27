@@ -123,7 +123,7 @@
 		"typecheck": "tsc --noEmit",
 		"check": "pnpm run build && pnpm run typecheck",
 		"deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-		"dev": "next dev",
+		"dev": "next dev --port 3001",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "eslint . --max-warnings=0",

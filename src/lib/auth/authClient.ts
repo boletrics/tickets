@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/client";
-import { jwtClient } from "better-auth/client/plugins";
+import { emailOTPClient, jwtClient } from "better-auth/client/plugins";
 import { getAuthServiceUrl } from "./config";
 
 export const authClient = createAuthClient({
@@ -7,7 +7,10 @@ export const authClient = createAuthClient({
 	fetchOptions: {
 		credentials: "include", // CRITICAL: Required for cookies
 	},
-	plugins: [jwtClient()],
+	plugins: [
+		jwtClient(),
+		emailOTPClient(), // For guest email verification during checkout
+	],
 });
 
 /**
