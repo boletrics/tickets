@@ -526,21 +526,21 @@ export default function CheckoutPage() {
 										<Image
 											src="/visa.svg"
 											alt="Visa"
-											width={48}
+											width={50}
 											height={32}
 											className="opacity-80"
 										/>
 										<Image
 											src="/mastercard.svg"
 											alt="Mastercard"
-											width={48}
+											width={50}
 											height={32}
 											className="opacity-80"
 										/>
 										<Image
 											src="/amex.svg"
 											alt="American Express"
-											width={48}
+											width={50}
 											height={32}
 											className="opacity-80"
 										/>
